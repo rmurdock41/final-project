@@ -1,4 +1,4 @@
-# Celestial Brush: Nature Revival System
+# Amaterasu's Brush: Interactive Nature Restoration
 
 ## CIS 566 Final Project Design Document
 
