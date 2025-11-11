@@ -8,10 +8,14 @@ public class SkyboxController : MonoBehaviour
     public float transitionSpeed = 0.5f;
 
     private bool isDay = true;
-    private float blendValue = 1f; 
+    private float blendValue = 1f;
     private float targetBlend = 1f;
     private float maxLightIntensity;
 
+
+    private Material daySkyboxInstance;
+    private Material nightSkyboxInstance;
+    private Material runtimeSkybox;
 
     private Color daySunDisc, nightSunDisc;
     private Color daySunHalo, nightSunHalo;
@@ -24,20 +28,23 @@ public class SkyboxController : MonoBehaviour
         maxLightIntensity = sunLight.intensity;
 
 
-        daySunDisc = daySkybox.GetColor("_SunDiscColor");
-        daySunHalo = daySkybox.GetColor("_SunHaloColor");
-        dayHorizon = daySkybox.GetColor("_HorizonLineColor");
-        daySkyTop = daySkybox.GetColor("_SkyGradientTop");
-        daySkyBottom = daySkybox.GetColor("_SkyGradientBottom");
+        daySkyboxInstance = new Material(daySkybox);
+        nightSkyboxInstance = new Material(nightSkybox);
+        runtimeSkybox = new Material(daySkybox);
 
-        nightSunDisc = nightSkybox.GetColor("_SunDiscColor");
-        nightSunHalo = nightSkybox.GetColor("_SunHaloColor");
-        nightHorizon = nightSkybox.GetColor("_HorizonLineColor");
-        nightSkyTop = nightSkybox.GetColor("_SkyGradientTop");
-        nightSkyBottom = nightSkybox.GetColor("_SkyGradientBottom");
+        daySunDisc = daySkyboxInstance.GetColor("_SunDiscColor");
+        daySunHalo = daySkyboxInstance.GetColor("_SunHaloColor");
+        dayHorizon = daySkyboxInstance.GetColor("_HorizonLineColor");
+        daySkyTop = daySkyboxInstance.GetColor("_SkyGradientTop");
+        daySkyBottom = daySkyboxInstance.GetColor("_SkyGradientBottom");
 
+        nightSunDisc = nightSkyboxInstance.GetColor("_SunDiscColor");
+        nightSunHalo = nightSkyboxInstance.GetColor("_SunHaloColor");
+        nightHorizon = nightSkyboxInstance.GetColor("_HorizonLineColor");
+        nightSkyTop = nightSkyboxInstance.GetColor("_SkyGradientTop");
+        nightSkyBottom = nightSkyboxInstance.GetColor("_SkyGradientBottom");
 
-        RenderSettings.skybox = daySkybox;
+        RenderSettings.skybox = runtimeSkybox;
     }
 
     void Update()
@@ -51,9 +58,7 @@ public class SkyboxController : MonoBehaviour
             SetNight();
         }
 
-
         blendValue = Mathf.Lerp(blendValue, targetBlend, Time.deltaTime * transitionSpeed);
-
 
         Color currentSunDisc = Color.Lerp(nightSunDisc, daySunDisc, blendValue);
         Color currentSunHalo = Color.Lerp(nightSunHalo, daySunHalo, blendValue);
@@ -62,17 +67,25 @@ public class SkyboxController : MonoBehaviour
         Color currentBottom = Color.Lerp(nightSkyBottom, daySkyBottom, blendValue);
 
 
-        Material currentSkybox = RenderSettings.skybox;
-        currentSkybox.SetColor("_SunDiscColor", currentSunDisc);
-        currentSkybox.SetColor("_SunHaloColor", currentSunHalo);
-        currentSkybox.SetColor("_HorizonLineColor", currentHorizon);
-        currentSkybox.SetColor("_SkyGradientTop", currentTop);
-        currentSkybox.SetColor("_SkyGradientBottom", currentBottom);
-
+        runtimeSkybox.SetColor("_SunDiscColor", currentSunDisc);
+        runtimeSkybox.SetColor("_SunHaloColor", currentSunHalo);
+        runtimeSkybox.SetColor("_HorizonLineColor", currentHorizon);
+        runtimeSkybox.SetColor("_SkyGradientTop", currentTop);
+        runtimeSkybox.SetColor("_SkyGradientBottom", currentBottom);
 
         sunLight.intensity = Mathf.Lerp(0.1f, maxLightIntensity, blendValue);
 
         DynamicGI.UpdateEnvironment();
+    }
+
+    void OnDestroy()
+    {
+        if (daySkyboxInstance != null)
+            Destroy(daySkyboxInstance);
+        if (nightSkyboxInstance != null)
+            Destroy(nightSkyboxInstance);
+        if (runtimeSkybox != null)
+            Destroy(runtimeSkybox);
     }
 
     public void SetDay()

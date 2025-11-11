@@ -37,24 +37,45 @@ public class Demo : MonoBehaviour {
 	private bool recognized;
 	private string newGestureName = "";
 
-	void Start () {
+    void Start()
+    {
 
-		gameManager = FindObjectOfType<GameManager>();
-		platform = Application.platform;
-		drawArea = new Rect(0, 0, Screen.width, Screen.height);
+        gameManager = FindObjectOfType<GameManager>();
+        platform = Application.platform;
+        drawArea = new Rect(0, 0, Screen.width, Screen.height);
 
-		//Load pre-made gestures
-		TextAsset[] gesturesXml = Resources.LoadAll<TextAsset>("GestureSet/10-stylus-MEDIUM/");
-		foreach (TextAsset gestureXml in gesturesXml)
-			trainingSet.Add(GestureIO.ReadGestureFromXML(gestureXml.text));
+        //Load pre-made gestures
+        TextAsset[] gesturesXml = Resources.LoadAll<TextAsset>("GestureSet/10-stylus-MEDIUM/");
+        foreach (TextAsset gestureXml in gesturesXml)
+        {
+            try
+            {
+                trainingSet.Add(GestureIO.ReadGestureFromXML(gestureXml.text));
+                Debug.Log("成功加载: " + gestureXml.name);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("加载失败: " + gestureXml.name + " - " + e.Message);
+            }
+        }
 
-		//Load user custom gestures
-		string[] filePaths = Directory.GetFiles(Application.persistentDataPath, "*.xml");
-		foreach (string filePath in filePaths)
-			trainingSet.Add(GestureIO.ReadGestureFromFile(filePath));
-	}
+        //Load user custom gestures
+        string[] filePaths = Directory.GetFiles(Application.persistentDataPath, "*.xml");
+        foreach (string filePath in filePaths)
+        {
+            try
+            {
+                trainingSet.Add(GestureIO.ReadGestureFromFile(filePath));
+                Debug.Log("成功加载: " + filePath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("加载失败: " + filePath + " - " + e.Message);
+            }
+        }
+    }
 
-	void Update () {
+    void Update () {
 
 		if (!gameManager.isDrawing)
 			return;

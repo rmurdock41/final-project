@@ -46,11 +46,11 @@ Material:
     m_Colors:
     - _Color0: {r: 0.6321383, g: 1, b: 0.2971698, a: 1}
     - _Horizon: {r: 1, g: 0, b: 0.7466021, a: 1}
-    - _HorizonLineColor: {r: 0.96657753, g: 0.9926254, b: 0.9897312, a: 1}
+    - _HorizonLineColor: {r: 0.961165, g: 0.9914312, b: 0.9880682, a: 1}
     - _Sky: {r: 1, g: 0, b: 0, a: 1}
-    - _SkyGradientBottom: {r: 0.45329857, g: 0.81958145, b: 0.8538301, a: 1}
-    - _SkyGradientTop: {r: 0.006422973, g: 0.5524739, b: 0.7971775, a: 1}
+    - _SkyGradientBottom: {r: 0.45097473, g: 0.815412, b: 0.8500199, a: 1}
+    - _SkyGradientTop: {r: 0.0074631157, g: 0.5507089, b: 0.7948871, a: 1}
     - _SubHorizonColor: {r: 0, g: 0, b: 0, a: 1}
-    - _SunDiscColor: {r: 0.98671615, g: 0.9944529, b: 0.99292403, a: 1}
-    - _SunHaloColor: {r: 0.8832262, g: 0.8466567, b: 0.75445956, a: 1}
+    - _SunDiscColor: {r: 0.9845649, g: 0.9935546, b: 0.99177814, a: 1}
+    - _SunHaloColor: {r: 0.87860465, g: 0.84371275, b: 0.7517846, a: 1}
     - _Sunhalocolor: {r: 1, g: 0, b: 0, a: 0}
