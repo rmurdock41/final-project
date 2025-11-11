@@ -37,45 +37,24 @@ public class Demo : MonoBehaviour {
 	private bool recognized;
 	private string newGestureName = "";
 
-    void Start()
-    {
+	void Start () {
 
-        gameManager = FindObjectOfType<GameManager>();
-        platform = Application.platform;
-        drawArea = new Rect(0, 0, Screen.width, Screen.height);
+		gameManager = FindObjectOfType<GameManager>();
+		platform = Application.platform;
+		drawArea = new Rect(0, 0, Screen.width, Screen.height);
 
-        //Load pre-made gestures
-        TextAsset[] gesturesXml = Resources.LoadAll<TextAsset>("GestureSet/10-stylus-MEDIUM/");
-        foreach (TextAsset gestureXml in gesturesXml)
-        {
-            try
-            {
-                trainingSet.Add(GestureIO.ReadGestureFromXML(gestureXml.text));
-                Debug.Log("成功加载: " + gestureXml.name);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("加载失败: " + gestureXml.name + " - " + e.Message);
-            }
-        }
+		//Load pre-made gestures
+		TextAsset[] gesturesXml = Resources.LoadAll<TextAsset>("GestureSet/10-stylus-MEDIUM/");
+		foreach (TextAsset gestureXml in gesturesXml)
+			trainingSet.Add(GestureIO.ReadGestureFromXML(gestureXml.text));
 
-        //Load user custom gestures
-        string[] filePaths = Directory.GetFiles(Application.persistentDataPath, "*.xml");
-        foreach (string filePath in filePaths)
-        {
-            try
-            {
-                trainingSet.Add(GestureIO.ReadGestureFromFile(filePath));
-                Debug.Log("成功加载: " + filePath);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("加载失败: " + filePath + " - " + e.Message);
-            }
-        }
-    }
+		//Load user custom gestures
+		string[] filePaths = Directory.GetFiles(Application.persistentDataPath, "*.xml");
+		foreach (string filePath in filePaths)
+			trainingSet.Add(GestureIO.ReadGestureFromFile(filePath));
+	}
 
-    void Update () {
+	void Update () {
 
 		if (!gameManager.isDrawing)
 			return;
@@ -152,49 +131,110 @@ public class Demo : MonoBehaviour {
 
 		Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
 
-		if (gestureResult.GestureClass == "cherrybomb")
-		{
-			Transform b = Instantiate(spherePrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity); ;
-			b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
+        if (gestureResult.GestureClass == "cherrybomb" || gestureResult.GestureClass == "sun")
+        {
+           
+            Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
+            Vector3 rayDirection = Camera.main.transform.forward;
+            RaycastHit hit;
 
-			if (recognized)
-			{
-				recognized = false;
-				strokeId = -1;
+        
+            if (!Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
+            {
+                FindObjectOfType<SkyboxController>().SetDay();
 
-				points.Clear();
+                if (recognized)
+                {
+                    recognized = false;
+                    strokeId = -1;
+                    points.Clear();
 
-				foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-				{
-					lineRenderer.SetVertexCount(0);
-					Destroy(lineRenderer.gameObject);
-				}
-				gestureLinesRenderer.Clear();
-			}
-		}
+                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+                    {
+                        lineRenderer.SetVertexCount(0);
+                        Destroy(lineRenderer.gameObject);
+                    }
+                    gestureLinesRenderer.Clear();
+                }
+            }
+            else 
+            {
+                Transform b = Instantiate(spherePrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity);
+                b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
 
-		//if (gestureResult.GestureClass == "mixandjam")
-		//{
-		//	Transform b = Instantiate(jammoPrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity); ;
-		//	b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
+                if (recognized)
+                {
+                    recognized = false;
+                    strokeId = -1;
 
-		//	if (recognized)
-		//	{
-		//		recognized = false;
-		//		strokeId = -1;
+                    points.Clear();
 
-		//		points.Clear();
+                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+                    {
+                        lineRenderer.SetVertexCount(0);
+                        Destroy(lineRenderer.gameObject);
+                    }
+                    gestureLinesRenderer.Clear();
+                }
+            }
+        }
 
-		//		foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-		//		{
-		//			lineRenderer.SetVertexCount(0);
-		//			Destroy(lineRenderer.gameObject);
-		//		}
-		//		gestureLinesRenderer.Clear();
-		//	}
-		//}
+        //if (gestureResult.GestureClass == "mixandjam")
+        //{
+        //	Transform b = Instantiate(jammoPrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity); ;
+        //	b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
 
-		if (gestureResult.GestureClass == "horizontal line" || gestureResult.GestureClass == "line")
+        //	if (recognized)
+        //	{
+        //		recognized = false;
+        //		strokeId = -1;
+
+        //		points.Clear();
+
+        //		foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+        //		{
+        //			lineRenderer.SetVertexCount(0);
+        //			Destroy(lineRenderer.gameObject);
+        //		}
+        //		gestureLinesRenderer.Clear();
+        //	}
+        //}
+
+        if (gestureResult.GestureClass == "moon")
+        {
+         
+            Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
+            Vector3 rayDirection = Camera.main.transform.forward;
+
+            RaycastHit hit;
+        
+            if (!Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
+            {
+                FindObjectOfType<SkyboxController>().SetNight();
+
+                if (recognized)
+                {
+                    recognized = false;
+                    strokeId = -1;
+                    points.Clear();
+
+                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+                    {
+                        lineRenderer.SetVertexCount(0);
+                        Destroy(lineRenderer.gameObject);
+                    }
+                    gestureLinesRenderer.Clear();
+                }
+            }
+            else
+            {
+             
+                ClearLine();
+            }
+        }
+
+
+        if (gestureResult.GestureClass == "horizontal line" || gestureResult.GestureClass == "line")
 		{
 			//loc = Vector3.MoveTowards(gestureLinesRenderer[0].bounds.center, Camera.main.transform.position, 5);
 
@@ -242,41 +282,53 @@ public class Demo : MonoBehaviour {
 		gestureLinesRenderer.Clear();
 	}
 
-	//void OnGUI() {
+    void OnGUI()
+    {
+        if (!gameManager.isDrawing)
+            return;
 
-	//	GUI.Box(drawArea, "Draw Area");
+        GUI.Box(drawArea, "Draw Area");
 
-	//	GUI.Label(new Rect(10, Screen.height - 40, 500, 50), message);
+        GUI.Label(new Rect(10, Screen.height - 40, 500, 50), message);
 
-	//	if (GUI.Button(new Rect(Screen.width - 100, 10, 100, 30), "Recognize")) {
+        if (GUI.Button(new Rect(Screen.width - 100, 10, 100, 30), "Recognize"))
+        {
+            if (points.Count > 0 && trainingSet.Count > 0)
+            {
+                recognized = true;
+                Gesture candidate = new Gesture(points.ToArray());
+                Result gestureResult = PointCloudRecognizer.Classify(candidate, trainingSet.ToArray());
+                message = gestureResult.GestureClass + " " + gestureResult.Score;
 
-	//		recognized = true;
+                if (gestureResult.GestureClass == "circle")
+                {
+                    print("worked");
+                }
+            }
+        }
 
-	//		Gesture candidate = new Gesture(points.ToArray());
-	//		Result gestureResult = PointCloudRecognizer.Classify(candidate, trainingSet.ToArray());
+        GUI.Label(new Rect(Screen.width - 200, 150, 70, 30), "Add as: ");
+        newGestureName = GUI.TextField(new Rect(Screen.width - 150, 150, 100, 30), newGestureName);
 
-	//		message = gestureResult.GestureClass + " " + gestureResult.Score;
+        if ((GUI.Button(new Rect(Screen.width - 50, 150, 50, 30), "Add") || Input.GetKeyDown(KeyCode.Return))
+            && points.Count > 0 && newGestureName != "")
+        {
+            string fileName = String.Format("{0}/{1}-{2}.xml", Application.persistentDataPath, newGestureName, DateTime.Now.ToFileTime());
 
-	//		if(gestureResult.GestureClass == "circle")
-	//		{
-	//			print("worked");
-	//		}
-	//	}
+#if !UNITY_WEBPLAYER
+            GestureIO.WriteGesture(points.ToArray(), newGestureName, fileName);
+#endif
 
-	//	GUI.Label(new Rect(Screen.width - 200, 150, 70, 30), "Add as: ");
-	//	newGestureName = GUI.TextField(new Rect(Screen.width - 150, 150, 100, 30), newGestureName);
+            trainingSet.Add(new Gesture(points.ToArray(), newGestureName));
 
-	//	if (GUI.Button(new Rect(Screen.width - 50, 150, 50, 30), "Add") && points.Count > 0 && newGestureName != "") {
+            // 加这行：显示成功消息
+            message = "成功保存: " + newGestureName + " (" + points.Count + " 个点)";
+            Debug.Log("手势已保存到: " + fileName);
 
-	//		string fileName = String.Format("{0}/{1}-{2}.xml", Application.persistentDataPath, newGestureName, DateTime.Now.ToFileTime());
+            newGestureName = "";
 
-	//		#if !UNITY_WEBPLAYER
-	//			GestureIO.WriteGesture(points.ToArray(), newGestureName, fileName);
-	//		#endif
-
-	//		trainingSet.Add(new Gesture(points.ToArray(), newGestureName));
-
-	//		newGestureName = "";
-	//	}
-	//}
+            // 清除画线
+            ClearLine();
+        }
+    }
 }
