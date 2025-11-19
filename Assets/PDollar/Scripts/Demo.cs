@@ -17,8 +17,9 @@ public class Demo : MonoBehaviour {
 	public Transform gestureOnScreenPrefab;
 	public Transform spherePrefab;
 	public Transform jammoPrefab;
+    public GameObject inkParticlePrefab;
 
-	private List<Gesture> trainingSet = new List<Gesture>();
+    private List<Gesture> trainingSet = new List<Gesture>();
 
 	private List<Point> points = new List<Point>();
 	private int strokeId = -1;
@@ -129,7 +130,7 @@ public class Demo : MonoBehaviour {
 			return;
 		}
 
-		Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+
 
         if (gestureResult.GestureClass == "cherrybomb" || gestureResult.GestureClass == "sun")
         {
@@ -138,27 +139,40 @@ public class Demo : MonoBehaviour {
             Vector3 rayDirection = Camera.main.transform.forward;
             RaycastHit hit;
 
-        
+
             if (!Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
             {
+                // 测试：笔迹转粒子
+                foreach (LineRenderer line in gestureLinesRenderer)
+                {
+                    GameObject converter = new GameObject("InkConverter");
+                    InkToParticles inkConverter = converter.AddComponent<InkToParticles>();
+                    inkConverter.particlePrefab = inkParticlePrefab;
+                    inkConverter.fadeDuration = 0.7f;
+                    inkConverter.particlesPerUnit = 3;
+                    inkConverter.particleColor = new Color(1f, 0.5f, 0f);  // 橙色
+
+                    inkConverter.ConvertLineToParticles(line);
+
+                    Destroy(line.gameObject, 3f);
+                    Destroy(converter, 2f);
+                }
+
+                // 切换白天
                 FindObjectOfType<SkyboxController>().SetDay();
 
+                // 清理
                 if (recognized)
                 {
                     recognized = false;
                     strokeId = -1;
                     points.Clear();
-
-                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-                    {
-                        lineRenderer.SetVertexCount(0);
-                        Destroy(lineRenderer.gameObject);
-                    }
                     gestureLinesRenderer.Clear();
                 }
             }
             else 
             {
+                Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
                 Transform b = Instantiate(spherePrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity);
                 b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
 
