@@ -1190,7 +1190,7 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: pb_Mesh21378
+  m_Name: pb_Mesh17436
   serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
@@ -12504,6 +12504,12 @@ MonoBehaviour:
   spherePrefab: {fileID: 6862020314441790168, guid: 460693cfe5146664a8c8f1bfd345b64e,
     type: 3}
   jammoPrefab: {fileID: 7746958836982433998, guid: 81b8696f19417ba49acb4afa8fdf2f10,
+    type: 3}
+  sunPrefab: {fileID: 7740858855061948206, guid: 4845a5a7952666c48b16dbefec678847,
+    type: 3}
+  moonPrefab: {fileID: 5992899643566532019, guid: ffe2489be3435d64aa8e6823165166c1,
+    type: 3}
+  plantPrefab: {fileID: 8075660657859875787, guid: 46da6f0ebfe4fd0438d09f4bc831574d,
     type: 3}
   inkParticlePrefab: {fileID: 4505168001499251740, guid: 3ee4ad59562b77349bfc3ed613185f3a,
     type: 3}

@@ -17,6 +17,9 @@ public class Demo : MonoBehaviour {
 	public Transform gestureOnScreenPrefab;
 	public Transform spherePrefab;
 	public Transform jammoPrefab;
+	public Transform sunPrefab;
+    public Transform moonPrefab;
+    public Transform plantPrefab;
     public GameObject inkParticlePrefab;
 
     private List<Gesture> trainingSet = new List<Gesture>();
@@ -110,39 +113,34 @@ public class Demo : MonoBehaviour {
 		}
 	}
 
-	public void TryRecognize()
-	{
-		if (points.Count <= 0)
-			return;
+    public void TryRecognize()
+    {
+        if (points.Count <= 0)
+            return;
 
-		if(recognized)
-			ClearLine();
+        if (recognized)
+            ClearLine();
 
-		recognized = true;
+        recognized = true;
 
-		Gesture candidate = new Gesture(points.ToArray());
+        Gesture candidate = new Gesture(points.ToArray());
 
-		Result gestureResult = PointCloudRecognizer.Classify(candidate, trainingSet.ToArray());
+        Result gestureResult = PointCloudRecognizer.Classify(candidate, trainingSet.ToArray());
 
-		if (gestureResult.Score < .75f)
-		{
-			ClearLine();
-			return;
-		}
-
-
+        if (gestureResult.Score < .75f)
+        {
+            ClearLine();
+            return;
+        }
 
         if (gestureResult.GestureClass == "cherrybomb" || gestureResult.GestureClass == "sun")
         {
-           
             Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
             Vector3 rayDirection = Camera.main.transform.forward;
             RaycastHit hit;
 
-
             if (!Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
             {
-                // 测试：笔迹转粒子
                 foreach (LineRenderer line in gestureLinesRenderer)
                 {
                     GameObject converter = new GameObject("InkConverter");
@@ -150,7 +148,6 @@ public class Demo : MonoBehaviour {
                     inkConverter.particlePrefab = inkParticlePrefab;
                     inkConverter.fadeDuration = 0.7f;
                     inkConverter.particlesPerUnit = 3;
-                    inkConverter.particleColor = new Color(1f, 0.5f, 0f);  // 橙色
 
                     inkConverter.ConvertLineToParticles(line);
 
@@ -158,10 +155,18 @@ public class Demo : MonoBehaviour {
                     Destroy(converter, 2f);
                 }
 
-                // 切换白天
+ 
+                Vector3 directionAway = (gestureCenter - Camera.main.transform.position).normalized;
+                Vector3 sunPosition = gestureCenter + directionAway * 20f;
+
+
+                Transform sun = Instantiate(sunPrefab, sunPosition, Quaternion.identity);
+
+
+                sun.LookAt(Camera.main.transform);
+
                 FindObjectOfType<SkyboxController>().SetDay();
 
-                // 清理
                 if (recognized)
                 {
                     recognized = false;
@@ -170,7 +175,7 @@ public class Demo : MonoBehaviour {
                     gestureLinesRenderer.Clear();
                 }
             }
-            else 
+            else
             {
                 Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
                 Transform b = Instantiate(spherePrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity);
@@ -193,37 +198,38 @@ public class Demo : MonoBehaviour {
             }
         }
 
-        //if (gestureResult.GestureClass == "mixandjam")
-        //{
-        //	Transform b = Instantiate(jammoPrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity); ;
-        //	b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
-
-        //	if (recognized)
-        //	{
-        //		recognized = false;
-        //		strokeId = -1;
-
-        //		points.Clear();
-
-        //		foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-        //		{
-        //			lineRenderer.SetVertexCount(0);
-        //			Destroy(lineRenderer.gameObject);
-        //		}
-        //		gestureLinesRenderer.Clear();
-        //	}
-        //}
-
         if (gestureResult.GestureClass == "moon")
         {
-         
             Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
             Vector3 rayDirection = Camera.main.transform.forward;
-
             RaycastHit hit;
-        
+
             if (!Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
             {
+
+                foreach (LineRenderer line in gestureLinesRenderer)
+                {
+                    GameObject converter = new GameObject("InkConverter");
+                    InkToParticles inkConverter = converter.AddComponent<InkToParticles>();
+                    inkConverter.particlePrefab = inkParticlePrefab;
+                    inkConverter.fadeDuration = 0.7f;
+                    inkConverter.particlesPerUnit = 3;
+                    inkConverter.particleColor = new Color(0.5f, 0.5f, 1f, 1f);  
+
+                    inkConverter.ConvertLineToParticles(line);
+
+                    Destroy(line.gameObject, 3f);
+                    Destroy(converter, 2f);
+                }
+
+
+                Vector3 directionAway = (gestureCenter - Camera.main.transform.position).normalized;
+                Vector3 moonPosition = gestureCenter + directionAway * 20f;
+
+                Transform moon = Instantiate(moonPrefab, moonPosition, Quaternion.identity);
+
+                moon.LookAt(Camera.main.transform);
+
                 FindObjectOfType<SkyboxController>().SetNight();
 
                 if (recognized)
@@ -231,56 +237,122 @@ public class Demo : MonoBehaviour {
                     recognized = false;
                     strokeId = -1;
                     points.Clear();
-
-                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-                    {
-                        lineRenderer.SetVertexCount(0);
-                        Destroy(lineRenderer.gameObject);
-                    }
                     gestureLinesRenderer.Clear();
                 }
             }
             else
             {
-             
+                ClearLine();
+            }
+        }
+
+        if (gestureResult.GestureClass == "horizontal line" || gestureResult.GestureClass == "line")
+        {
+            RaycastHit hit = new RaycastHit();
+            if (Physics.SphereCast(gestureLinesRenderer[0].bounds.center, 3, Camera.main.transform.forward, out hit, 15, layerMask))
+            {
+                if (hit.collider.CompareTag("Cuttable"))
+                {
+                    hit.collider.GetComponent<TreeScript>().Slash();
+                    Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+                }
+            }
+
+            if (recognized)
+            {
+                recognized = false;
+                strokeId = -1;
+
+                points.Clear();
+
+                foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+                {
+                    lineRenderer.SetVertexCount(0);
+                    Destroy(lineRenderer.gameObject);
+                }
+                gestureLinesRenderer.Clear();
+            }
+        }
+
+
+        if (gestureResult.GestureClass == "plant")
+        {
+            Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
+            Vector3 rayDirection = Camera.main.transform.forward;
+            RaycastHit hit;
+
+
+            if (Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
+            {
+
+                foreach (LineRenderer line in gestureLinesRenderer)
+                {
+                    GameObject converter = new GameObject("InkConverter");
+                    InkToParticles inkConverter = converter.AddComponent<InkToParticles>();
+                    inkConverter.particlePrefab = inkParticlePrefab;
+                    inkConverter.fadeDuration = 0.7f;
+                    inkConverter.particlesPerUnit = 3;
+
+                    inkConverter.ConvertLineToParticles(line);
+
+                    Destroy(line.gameObject, 3f);
+                    Destroy(converter, 2f);
+                }
+
+                // gen plant
+                Transform plant = Instantiate(plantPrefab, hit.point, Quaternion.identity);
+
+                //  get AlembicStreamPlayer and play animation
+                var alembicPlayer = plant.GetComponent<UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer>();
+                if (alembicPlayer != null)
+                {
+                    alembicPlayer.CurrentTime = 0f; 
+                    StartCoroutine(PlayAndDestroy(plant.gameObject, alembicPlayer));
+                }
+                else
+                {
+                    Destroy(plant.gameObject, 3f);
+                }
+
+
+                if (recognized)
+                {
+                    recognized = false;
+                    strokeId = -1;
+                    points.Clear();
+                    gestureLinesRenderer.Clear();
+                }
+            }
+            else
+            {
                 ClearLine();
             }
         }
 
 
-        if (gestureResult.GestureClass == "horizontal line" || gestureResult.GestureClass == "line")
-		{
-			//loc = Vector3.MoveTowards(gestureLinesRenderer[0].bounds.center, Camera.main.transform.position, 5);
-
-			RaycastHit hit = new RaycastHit();
-			if (Physics.SphereCast(gestureLinesRenderer[0].bounds.center, 3, Camera.main.transform.forward, out hit, 15, layerMask))
-			{
-				if (hit.collider.CompareTag("Cuttable"))
-				{
-					hit.collider.GetComponent<TreeScript>().Slash();
-					Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
-				}
-			}
-
-			if (recognized)
-			{
-				recognized = false;
-				strokeId = -1;
-
-				points.Clear();
-
-				foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-				{
-					lineRenderer.SetVertexCount(0);
-					Destroy(lineRenderer.gameObject);
-				}
-				gestureLinesRenderer.Clear();
-			}
-		}
-	}
 
 
-	public void ClearLine()
+    }
+
+    private IEnumerator PlayAndDestroy(GameObject plantObj, UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer player)
+    {
+        float duration = player.Duration;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            player.CurrentTime = elapsed;
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+
+        yield return new WaitForSeconds(3f);
+
+        Destroy(plantObj);
+    }
+
+    public void ClearLine()
 	{
 		recognized = false;
 		strokeId = -1;
@@ -335,13 +407,11 @@ public class Demo : MonoBehaviour {
 
             trainingSet.Add(new Gesture(points.ToArray(), newGestureName));
 
-            // 加这行：显示成功消息
-            message = "成功保存: " + newGestureName + " (" + points.Count + " 个点)";
-            Debug.Log("手势已保存到: " + fileName);
+            message = "saved: " + newGestureName + " (" + points.Count + " points)";
+            Debug.Log("saved to: " + fileName);
 
             newGestureName = "";
 
-            // 清除画线
             ClearLine();
         }
     }

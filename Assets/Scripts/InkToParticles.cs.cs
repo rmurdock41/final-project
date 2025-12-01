@@ -83,7 +83,6 @@ public class InkToParticles : MonoBehaviour
         {
             timer += Time.deltaTime;
 
-            // 1. 粒子生成
             float particleProgress = Mathf.Clamp01(timer / totalDuration);
             int currentParticleIndex = Mathf.FloorToInt(particleCount * particleProgress);
 
@@ -132,7 +131,6 @@ public class InkToParticles : MonoBehaviour
 
             lastParticleIndex = currentParticleIndex;
 
-            // 2. 线条重现
             if (timer > lineDelay && line != null)
             {
                 float lineProgress = Mathf.Clamp01((timer - lineDelay) / totalDuration);
@@ -144,7 +142,6 @@ public class InkToParticles : MonoBehaviour
                     line.SetPosition(i, allPositions[i]);
                 }
 
-                // 3. 线条追上的粒子开始消散（按顺序）
                 int lineParticleIndex = Mathf.FloorToInt(particleCount * lineProgress);
 
                 for (int i = lastActivatedParticle; i < lineParticleIndex && i < particles.Count; i++)
@@ -155,7 +152,7 @@ public class InkToParticles : MonoBehaviour
                         fadeOut.fadeDuration = fadeDuration;
                         fadeOut.scaleDuration = scaleDuration;
                         fadeOut.rotationSpeed = Random.Range(100f, 300f);
-                        fadeOut.startDelay = 0f;  // 线条追上立即消散
+                        fadeOut.startDelay = 0f;  
                     }
                 }
 
@@ -165,7 +162,6 @@ public class InkToParticles : MonoBehaviour
             yield return null;
         }
 
-        // 确保所有粒子都开始消散（按顺序）
         for (int i = lastActivatedParticle; i < particles.Count; i++)
         {
             if (particles[i] != null)
@@ -175,7 +171,6 @@ public class InkToParticles : MonoBehaviour
                 fadeOut.scaleDuration = scaleDuration;
                 fadeOut.rotationSpeed = Random.Range(100f, 300f);
 
-                // 剩余粒子按顺序延迟消散
                 float delay = (float)(i - lastActivatedParticle) * 0.02f;
                 fadeOut.startDelay = delay;
             }
@@ -183,7 +178,6 @@ public class InkToParticles : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
 
-        // 线条淡出（从头到尾逐渐消失）
         float fadeOutDuration = 1f;
         timer = 0f;
 
@@ -192,10 +186,8 @@ public class InkToParticles : MonoBehaviour
             timer += Time.deltaTime;
             float fadeProgress = timer / fadeOutDuration;
 
-            // 计算还保留多少点（从头开始消失）
             int remainingPoints = Mathf.Max(2, Mathf.CeilToInt(pointCount * (1f - fadeProgress)));
 
-            // 只显示后面的点
             int startPoint = pointCount - remainingPoints;
 
             line.positionCount = remainingPoints;
@@ -207,7 +199,6 @@ public class InkToParticles : MonoBehaviour
             yield return null;
         }
 
-        // 销毁线条
         if (line != null)
         {
             line.positionCount = 0;
