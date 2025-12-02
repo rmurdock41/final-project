@@ -18,12 +18,13 @@ I will use Houdini to create assets like tree blooming and grass growth, then im
 
 ---
 
-## Goal
+#### Goal
 
 Extend the existing Mix and Jam Celestial Brush project with the following features:
 
 1. **Day/Night Control** - Draw sun/moon to transition sky colors and lighting
-2. **Tree Blooming** - Draw on dead trees to trigger blooming and leaf growth effects
+2. **Plant Growth** - Draw plant gesture to spawn growing vegetation with Houdini animations
+3. **Visual Effects Enhancement** - Add ink particle effects and celestial object animations
 
 ---
 
@@ -49,7 +50,7 @@ Extend the existing Mix and Jam Celestial Brush project with the following featu
 
 ## Specifications
 
-### Core Features:
+###### Core Features:
 
 **1. Day/Night System**
 
@@ -57,34 +58,30 @@ Extend the existing Mix and Jam Celestial Brush project with the following featu
 - Sky color transitions
 - Lighting changes
 
-**2. Tree Blooming System**
+**2. Plant Growth System**
 
-- Detect circle gesture on dead trees
-- Play tree blooming animation:
-  - Dead tree turns green
-  - Leaves grow
-  - Flowers bloom
+- Detect plant gesture on ground
+- Spawn plants with growth animations
+- Alembic-based procedural animation from Houdini
 
 ---
 
-## Techniques
+#### Techniques
 
 ### Workflow:
 
 **Houdini:**
 
-- Create tree/plant models
-- Use L-system or other tools to generate plants
-- Create blooming/growing animations
-- Export to Unity
+- Create plant models with branches and leaves
+- Create curl-to-unfold growth animations
+- Export as Alembic format to Unity
 
 **Unity:**
 
-- Import Houdini assets
+- Import Houdini Alembic assets
 - Connect gesture recognition to effect triggers
 - Handle day/night lighting changes
-
----
+- Implement ink particle conversion system
 
 ## Design
 
