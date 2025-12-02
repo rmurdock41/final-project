@@ -109,8 +109,6 @@ Unity Integration:
 
 ## Implemented Feature
 
-
-
 ### 1. Day/Night System
 
 **Implementation Details:**
@@ -139,9 +137,8 @@ Unity Integration:
   - Uses material instances to avoid modifying original assets
   - Lerp interpolation for smooth transition effects
   - Memory management: Cleans up material instances in `OnDestroy`
-    
-    
-    
+
+---
 
 ### 2. Ink Particle Effects System
 
@@ -189,8 +186,10 @@ Unity Integration:
   - Particles positioned slightly toward camera for depth
   - Line gradually reveals while particles are generated
   - Smooth transition from ink stroke to floating particles
+    
+    
 
-
+---
 
 ### 3. Celestial Object System (Sun/Moon)
 
@@ -260,7 +259,7 @@ Unity Integration:
 - Integration with SkyboxController for global day/night transitions
 - Memory management: Automatic object destruction after animation completion
 
-
+---
 
 ### 4. Plant Growth Animation System
 
@@ -324,8 +323,8 @@ Unity Integration:
 - Smooth scale interpolation prevents abrupt disappearance
 - Configurable shrink animation duration (`shrinkDuration`)
 - Automatic memory management and object cleanup
-  
-  
+
+---
 
 ### 5. Gesture Recognition and Integration System
 
