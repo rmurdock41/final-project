@@ -277,49 +277,29 @@ public class Demo : MonoBehaviour {
 
         if (gestureResult.GestureClass == "plant")
         {
-            Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
-            Vector3 rayDirection = Camera.main.transform.forward;
+
+            Vector3 startScreenPos = new Vector3(points[0].X, -points[0].Y, 0);
+
+
+            Ray ray = Camera.main.ScreenPointToRay(new Vector3(points[0].X, -points[0].Y, 0));
             RaycastHit hit;
 
-
-            if (Physics.Raycast(gestureCenter, rayDirection, out hit, 100f))
+            if (Physics.Raycast(ray, out hit, 100f))
             {
-
-                foreach (LineRenderer line in gestureLinesRenderer)
-                {
-                    GameObject converter = new GameObject("InkConverter");
-                    InkToParticles inkConverter = converter.AddComponent<InkToParticles>();
-                    inkConverter.particlePrefab = inkParticlePrefab;
-                    inkConverter.fadeDuration = 0.7f;
-                    inkConverter.particlesPerUnit = 3;
-
-                    inkConverter.ConvertLineToParticles(line);
-
-                    Destroy(line.gameObject, 3f);
-                    Destroy(converter, 2f);
-                }
-
-                // gen plant
-                Transform plant = Instantiate(plantPrefab, hit.point, Quaternion.identity);
-
-                //  get AlembicStreamPlayer and play animation
-                var alembicPlayer = plant.GetComponent<UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer>();
-                if (alembicPlayer != null)
-                {
-                    alembicPlayer.CurrentTime = 0f; 
-                    StartCoroutine(PlayAndDestroy(plant.gameObject, alembicPlayer));
-                }
-                else
-                {
-                    Destroy(plant.gameObject, 3f);
-                }
-
+    
+                Vector3 spawnPosition = hit.point + Vector3.down * 0.2f;
+                Transform plant = Instantiate(plantPrefab, spawnPosition, Quaternion.identity);
 
                 if (recognized)
                 {
                     recognized = false;
                     strokeId = -1;
                     points.Clear();
+                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+                    {
+                        lineRenderer.SetVertexCount(0);
+                        Destroy(lineRenderer.gameObject);
+                    }
                     gestureLinesRenderer.Clear();
                 }
             }
@@ -328,9 +308,6 @@ public class Demo : MonoBehaviour {
                 ClearLine();
             }
         }
-
-
-
 
     }
 

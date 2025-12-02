@@ -137903,6 +137903,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8075660657859875787}
   - component: {fileID: 610416456533991180}
+  - component: {fileID: 1807382455515894410}
   m_Layer: 0
   m_Name: plant
   m_TagString: Untagged
@@ -137918,7 +137919,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7701825551653238994}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.9502883, y: -1.63, z: -2.7098486}
+  m_LocalPosition: {x: 1.9502883, y: -2.61, z: -2.7098486}
   m_LocalScale: {x: 1000, y: 1000, z: 1000}
   m_Children:
   - {fileID: 1215123896722222649}
@@ -137962,10 +137963,23 @@ MonoBehaviour:
       createCurveRenderers: 0
     mediaStartTime: 0
     mediaEndTime: 0
-  startTime: 0.041666668
-  endTime: 0.7228915
+  startTime: 0.19726562
+  endTime: 7.7248454
   currentTime: 0
   vertexMotionScale: 1
+--- !u!114 &1807382455515894410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7701825551653238994}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c5fdcc5d7e61a2045b0e1ae03e1a1e62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shrinkDuration: 2
 --- !u!1 &7706634718657924902
 GameObject:
   m_ObjectHideFlags: 0
