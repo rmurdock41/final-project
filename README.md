@@ -186,8 +186,6 @@ Unity Integration:
   - Particles positioned slightly toward camera for depth
   - Line gradually reveals while particles are generated
   - Smooth transition from ink stroke to floating particles
-    
-    
 
 ---
 
@@ -267,6 +265,8 @@ Unity Integration:
 
 - **PlantAnimationPlayer Script**: Controls Alembic animation playback and object lifecycle
 - **Houdini Asset Workflow**: Creates procedural plant growth animations
+  
+  link to this .abc file (need to put this under asset folder) https://drive.google.com/file/d/1Gd7eytmGq8QGVedfsjnjZ6YcEPdpaOYz/view?usp=drive_link
 
 **Houdini Production Pipeline:**
 
