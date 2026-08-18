@@ -38,7 +38,12 @@ public class MovementInput : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		anim = this.GetComponent<Animator> ();
+		if (anim == null) {
+			anim = this.GetComponent<Animator> ();
+		}
+		if (anim == null) {
+			anim = this.GetComponentInChildren<Animator> ();
+		}
 		cam = Camera.main;
 		controller = this.GetComponent<CharacterController> ();
 	}
@@ -48,16 +53,25 @@ public class MovementInput : MonoBehaviour {
 		InputMagnitude ();
 
         isGrounded = controller.isGrounded;
-        if (isGrounded)
+        if (isGrounded && verticalVel < 0f)
         {
-            verticalVel -= 0;
+            // Keep a small downward force so CharacterController remains snapped to slopes/ground.
+            verticalVel = -2f;
         }
         else
         {
-            verticalVel -= .2f;
+            verticalVel += Physics.gravity.y * Time.deltaTime;
         }
-        moveVector = new Vector3(0, verticalVel * .2f * Time.deltaTime, 0);
-        controller.Move(moveVector);
+        Vector3 horizontalVelocity = Speed > allowPlayerRotation
+            ? Vector3.ClampMagnitude(desiredMoveDirection, 1f) * Velocity
+            : Vector3.zero;
+        moveVector = horizontalVelocity + Vector3.up * verticalVel;
+        CollisionFlags collisionFlags = controller.Move(moveVector * Time.deltaTime);
+        if ((collisionFlags & CollisionFlags.Below) != 0)
+        {
+            isGrounded = true;
+            verticalVel = -2f;
+        }
 
 
     }
@@ -80,7 +94,6 @@ public class MovementInput : MonoBehaviour {
 
 		if (blockRotationPlayer == false) {
 			transform.rotation = Quaternion.Slerp (transform.rotation, Quaternion.LookRotation (desiredMoveDirection), desiredRotationSpeed);
-            controller.Move(desiredMoveDirection * Time.deltaTime * Velocity);
 		}
 	}
 
@@ -115,10 +128,10 @@ public class MovementInput : MonoBehaviour {
         //Physically move player
 
 		if (Speed > allowPlayerRotation) {
-			anim.SetFloat ("Blend", Speed, StartAnimTime, Time.deltaTime);
+			if (anim != null) anim.SetFloat ("Blend", Speed, StartAnimTime, Time.deltaTime);
 			PlayerMoveAndRotation ();
 		} else if (Speed < allowPlayerRotation) {
-			anim.SetFloat ("Blend", Speed, StopAnimTime, Time.deltaTime);
+			if (anim != null) anim.SetFloat ("Blend", Speed, StopAnimTime, Time.deltaTime);
 		}
 	}
 }

@@ -12,10 +12,7 @@ public class TreeUpperScript : MonoBehaviour
 
     private void Start()
     {
-        if (GetComponent<CinemachineImpulseSource>() != null)
-        {
-            impulseSource = GetComponent<CinemachineImpulseSource>();
-        }
+        impulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
     private void OnCollisionEnter(Collision collision)

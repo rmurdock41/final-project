@@ -8,19 +8,64 @@ Muqiao Lei
 
 ![See attached pipeline diagram](imgs/cover.png)
 
+![Amaterasu movement and brush showcase](imgs/okami_walk.gif)
+
+---
+
+## Quick Start
+
+### Requirements
+
+- Unity `2019.4.3f1`
+- Windows Build Support (Mono) for creating a Windows build
+
+This portfolio repository intentionally contains the gameplay, editor, and
+shader source without the project's large Alembic, Houdini, character,
+third-party, and generated assets. Restore those locally owned production
+assets before opening the complete showcase scene.
+
+Open `Assets/Scenes/MixAndJAm.unity` and press Play.
+
+### Controls
+
+| Input | Action |
+| --- | --- |
+| `W`, `A`, `S`, `D` | Move the character |
+| Hold `C` | Enter Celestial Brush mode |
+| Left mouse button | Draw while Brush mode is active |
+| Release `C` | Recognize the gesture and trigger its effect |
+| `R` | Reload the current scene |
+| `D` / `N` | Debug shortcuts for day/night |
+
+Available gestures include sun/circle, moon, plant and horizontal line. The main
+scene also retains the original bomb and tree-cutting interactions from the Mix
+and Jam prototype.
+
+### Building
+
+The checked-in standalone configuration uses the Mono scripting backend so the
+project can be built with the standard Windows Build Support module. The only
+enabled build scene is `Assets/Scenes/MixAndJAm.unity`.
+
 ---
 
 ## Introduction
 
-This project extends the Mix and Jam Celestial Brush project. The original project implements a gesture recognition system, and I will add actual visual effects on top of it.
+This project extends the Mix and Jam Celestial Brush project with nature
+restoration effects, procedural growth animation, day/night control, ink-style
+rendering, and additional character/environment systems built around the
+original gesture-recognition foundation.
 
-I will use Houdini to create assets like tree blooming and grass growth, then import them into Unity so gestures can trigger these effects. I will also implement a day/night transition system.
+Houdini-authored tree blooming and grass-growth animations are integrated into
+Unity so recognized gestures can trigger the effects, alongside a day/night
+transition system.
 
 ---
 
 #### Goal
 
-Extend the existing Mix and Jam Celestial Brush project with the following features:
+The project extends the existing Mix and Jam Celestial Brush prototype with the
+following features:
 
 1. **Day/Night Control** - Draw sun/moon to transition sky colors and lighting
 2. **Plant Growth** - Draw plant gesture to spawn growing vegetation with Houdini animations
@@ -263,7 +308,8 @@ Unity Integration:
 - **PlantAnimationPlayer Script**: Controls Alembic animation playback and object lifecycle
 - **Houdini Asset Workflow**: Creates procedural plant growth animations
   
-  link to this .abc file (need to put this under asset folder) https://drive.google.com/file/d/1Gd7eytmGq8QGVedfsjnjZ6YcEPdpaOYz/view?usp=drive_link
+  The production Alembic cache is intentionally kept out of this source-only
+  repository because of its size.
 
 **Houdini Production Pipeline:**
 

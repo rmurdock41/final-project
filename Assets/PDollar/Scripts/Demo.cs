@@ -6,7 +6,6 @@ using System.IO;
 using DG.Tweening;
 using PDollarGestureRecognizer;
 using Cinemachine;
-using UnityEditor;
 
 public class Demo : MonoBehaviour {
 
@@ -21,6 +20,8 @@ public class Demo : MonoBehaviour {
     public Transform moonPrefab;
     public Transform plantPrefab;
     public GameObject inkParticlePrefab;
+    [Range(0f, 1f)] public float minimumRecognitionScore = 0.7f;
+    public float plantRaycastDistance = 500f;
 
     private List<Gesture> trainingSet = new List<Gesture>();
 
@@ -29,6 +30,7 @@ public class Demo : MonoBehaviour {
 
 	private Vector3 virtualKeyPosition = Vector2.zero;
 	private Rect drawArea;
+	[SerializeField] private bool showGestureDebugUI = false;
 
 	private RuntimePlatform platform;
 	private int vertexCount = 0;
@@ -44,6 +46,12 @@ public class Demo : MonoBehaviour {
 	void Start () {
 
 		gameManager = FindObjectOfType<GameManager>();
+		if (gameManager == null) {
+			Debug.LogError("Demo requires a GameManager in the scene.", this);
+			enabled = false;
+			return;
+		}
+
 		platform = Application.platform;
 		drawArea = new Rect(0, 0, Screen.width, Screen.height);
 
@@ -63,19 +71,35 @@ public class Demo : MonoBehaviour {
 		if (!gameManager.isDrawing)
 			return;
 
+		// The Game view / standalone window can change size after Start. Keep the
+		// input sampling rectangle matched to the actual drawable screen so no
+		// part of the visible brush canvas becomes a dead zone.
+		if (drawArea.width != Screen.width || drawArea.height != Screen.height)
+			drawArea = new Rect(0, 0, Screen.width, Screen.height);
+
+		bool pointerDown = false;
+		bool pointerHeld = false;
+
 		if (platform == RuntimePlatform.Android || platform == RuntimePlatform.IPhonePlayer) {
 			if (Input.touchCount > 0) {
-				virtualKeyPosition = new Vector3(Input.GetTouch(0).position.x, Input.GetTouch(0).position.y);
+				Touch touch = Input.GetTouch(0);
+				virtualKeyPosition = touch.position;
+				pointerDown = touch.phase == TouchPhase.Began;
+				pointerHeld = touch.phase == TouchPhase.Began ||
+				              touch.phase == TouchPhase.Moved ||
+				              touch.phase == TouchPhase.Stationary;
 			}
 		} else {
-			if (Input.GetMouseButton(0)) {
+			pointerDown = Input.GetMouseButtonDown(0);
+			pointerHeld = Input.GetMouseButton(0);
+			if (pointerHeld) {
 				virtualKeyPosition = new Vector3(Input.mousePosition.x, Input.mousePosition.y);
 			}
 		}
 
 		if (drawArea.Contains(virtualKeyPosition)) {
 
-			if (Input.GetMouseButtonDown(0)) {
+			if (pointerDown) {
 
 				if (recognized) {
 
@@ -86,7 +110,7 @@ public class Demo : MonoBehaviour {
 
 					foreach (LineRenderer lineRenderer in gestureLinesRenderer) {
 
-						lineRenderer.SetVertexCount(0);
+						lineRenderer.positionCount = 0;
 						Destroy(lineRenderer.gameObject);
 					}
 
@@ -104,10 +128,10 @@ public class Demo : MonoBehaviour {
 				vertexCount = 0;
 			}
 			
-			if (Input.GetMouseButton(0)) {
+			if (pointerHeld && currentGestureLineRenderer != null) {
 				points.Add(new Point(virtualKeyPosition.x, -virtualKeyPosition.y, strokeId));
 
-				currentGestureLineRenderer.SetVertexCount(++vertexCount);
+				currentGestureLineRenderer.positionCount = ++vertexCount;
 				currentGestureLineRenderer.SetPosition(vertexCount - 1, Camera.main.ScreenToWorldPoint(new Vector3(virtualKeyPosition.x, virtualKeyPosition.y, 10)));
 			}
 		}
@@ -118,6 +142,13 @@ public class Demo : MonoBehaviour {
         if (points.Count <= 0)
             return;
 
+        if (trainingSet.Count == 0)
+        {
+            Debug.LogWarning("No gesture templates were loaded.", this);
+            ClearLine();
+            return;
+        }
+
         if (recognized)
             ClearLine();
 
@@ -126,15 +157,22 @@ public class Demo : MonoBehaviour {
         Gesture candidate = new Gesture(points.ToArray());
 
         Result gestureResult = PointCloudRecognizer.Classify(candidate, trainingSet.ToArray());
+        string gestureClass = gestureResult.GestureClass.Trim().ToLowerInvariant().Replace('_', ' ');
+        message = gestureClass + " " + gestureResult.Score.ToString("0.00");
+        Debug.Log("Gesture recognized as " + message, this);
 
-        if (gestureResult.Score < .75f)
+        if (gestureResult.Score < minimumRecognitionScore)
         {
-            ClearLine();
+            Debug.LogWarning("Gesture confidence was too low: " + message, this);
+            PlayFailedInk();
             return;
         }
 
-        if (gestureResult.GestureClass == "cherrybomb" || gestureResult.GestureClass == "sun")
+        bool gestureClassHandled = false;
+
+        if (gestureClass == "cherrybomb" || gestureClass == "sun")
         {
+            gestureClassHandled = true;
             Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
             Vector3 rayDirection = Camera.main.transform.forward;
             RaycastHit hit;
@@ -165,7 +203,9 @@ public class Demo : MonoBehaviour {
 
                 sun.LookAt(Camera.main.transform);
 
-                FindObjectOfType<SkyboxController>().SetDay();
+                SkyboxController skyboxController = FindObjectOfType<SkyboxController>();
+                if (skyboxController != null)
+                    skyboxController.SetDay();
 
                 if (recognized)
                 {
@@ -177,7 +217,9 @@ public class Demo : MonoBehaviour {
             }
             else
             {
-                Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+                CinemachineImpulseSource impulseSource = Camera.main.GetComponent<CinemachineImpulseSource>();
+                if (impulseSource != null)
+                    impulseSource.GenerateImpulse();
                 Transform b = Instantiate(spherePrefab, gestureLinesRenderer[0].bounds.center, Quaternion.identity);
                 b.DOScale(0, .2f).From().SetEase(Ease.OutBack);
 
@@ -190,7 +232,7 @@ public class Demo : MonoBehaviour {
 
                     foreach (LineRenderer lineRenderer in gestureLinesRenderer)
                     {
-                        lineRenderer.SetVertexCount(0);
+                        lineRenderer.positionCount = 0;
                         Destroy(lineRenderer.gameObject);
                     }
                     gestureLinesRenderer.Clear();
@@ -198,8 +240,9 @@ public class Demo : MonoBehaviour {
             }
         }
 
-        if (gestureResult.GestureClass == "moon")
+        if (gestureClass == "moon")
         {
+            gestureClassHandled = true;
             Vector3 gestureCenter = gestureLinesRenderer[0].bounds.center;
             Vector3 rayDirection = Camera.main.transform.forward;
             RaycastHit hit;
@@ -230,7 +273,9 @@ public class Demo : MonoBehaviour {
 
                 moon.LookAt(Camera.main.transform);
 
-                FindObjectOfType<SkyboxController>().SetNight();
+                SkyboxController skyboxController = FindObjectOfType<SkyboxController>();
+                if (skyboxController != null)
+                    skyboxController.SetNight();
 
                 if (recognized)
                 {
@@ -242,73 +287,146 @@ public class Demo : MonoBehaviour {
             }
             else
             {
-                ClearLine();
+                PlayFailedInk();
             }
         }
 
-        if (gestureResult.GestureClass == "horizontal line" || gestureResult.GestureClass == "line")
+        if (gestureClass == "horizontal line" || gestureClass == "line")
         {
+            gestureClassHandled = true;
+            bool cutSucceeded = false;
             RaycastHit hit = new RaycastHit();
             if (Physics.SphereCast(gestureLinesRenderer[0].bounds.center, 3, Camera.main.transform.forward, out hit, 15, layerMask))
             {
                 if (hit.collider.CompareTag("Cuttable"))
                 {
-                    hit.collider.GetComponent<TreeScript>().Slash();
-                    Camera.main.GetComponent<CinemachineImpulseSource>().GenerateImpulse();
+                    cutSucceeded = true;
+                    TreeScript tree = hit.collider.GetComponentInParent<TreeScript>();
+                    if (tree != null)
+                        tree.Slash();
+
+                    CinemachineImpulseSource impulseSource = Camera.main.GetComponent<CinemachineImpulseSource>();
+                    if (impulseSource != null)
+                        impulseSource.GenerateImpulse();
+
                 }
             }
 
-            if (recognized)
-            {
-                recognized = false;
-                strokeId = -1;
-
-                points.Clear();
-
-                foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-                {
-                    lineRenderer.SetVertexCount(0);
-                    Destroy(lineRenderer.gameObject);
-                }
-                gestureLinesRenderer.Clear();
-            }
+            if (cutSucceeded)
+                ClearLine();
+            else
+                PlayFailedInk();
         }
 
-
-        if (gestureResult.GestureClass == "plant")
+        if (gestureClass == "plant")
         {
-
-            Vector3 startScreenPos = new Vector3(points[0].X, -points[0].Y, 0);
-
-
-            Ray ray = Camera.main.ScreenPointToRay(new Vector3(points[0].X, -points[0].Y, 0));
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit, 100f))
+            gestureClassHandled = true;
+            if (plantPrefab == null)
             {
-    
-                Vector3 spawnPosition = hit.point + Vector3.down * 0.2f;
-                Transform plant = Instantiate(plantPrefab, spawnPosition, Quaternion.identity);
+                Debug.LogError("The plant prefab is not assigned on Demo.", this);
+                ClearLine();
+                return;
+            }
 
-                if (recognized)
-                {
-                    recognized = false;
-                    strokeId = -1;
-                    points.Clear();
-                    foreach (LineRenderer lineRenderer in gestureLinesRenderer)
-                    {
-                        lineRenderer.SetVertexCount(0);
-                        Destroy(lineRenderer.gameObject);
-                    }
-                    gestureLinesRenderer.Clear();
-                }
+            Vector3 spawnPosition;
+            if (TryGetPlantSpawnPosition(out spawnPosition))
+            {
+                Instantiate(plantPrefab, spawnPosition + Vector3.down * 0.2f, Quaternion.identity);
+                ClearLine();
             }
             else
             {
-                ClearLine();
+                Debug.LogWarning("Plant gesture recognized, but no ground was found in front of the camera.", this);
+                PlayFailedInk();
             }
         }
 
+        if (!gestureClassHandled && gestureLinesRenderer.Count > 0)
+        {
+            Debug.LogWarning("No brush action is assigned to gesture: " + gestureClass, this);
+            PlayFailedInk();
+        }
+
+    }
+
+    private void PlayFailedInk()
+    {
+        Camera effectCamera = Camera.main;
+        foreach (LineRenderer lineRenderer in gestureLinesRenderer)
+        {
+            if (lineRenderer == null)
+                continue;
+
+            FailedInkDissolve.Play(lineRenderer, effectCamera);
+            Destroy(lineRenderer.gameObject);
+        }
+
+        recognized = false;
+        strokeId = -1;
+        points.Clear();
+        gestureLinesRenderer.Clear();
+        currentGestureLineRenderer = null;
+    }
+
+    private bool TryGetPlantSpawnPosition(out Vector3 spawnPosition)
+    {
+        spawnPosition = Vector3.zero;
+
+        Camera camera = Camera.main;
+        if (camera == null || points.Count == 0)
+            return false;
+
+        Point bottomPoint = points[0];
+        for (int i = 1; i < points.Count; i++)
+        {
+            // Gesture points store screen Y negated for the recognizer. The
+            // visually lowest screen point therefore has the greatest stored Y.
+            if (points[i].Y > bottomPoint.Y)
+                bottomPoint = points[i];
+        }
+
+        Vector3 screenPoint = new Vector3(bottomPoint.X, -bottomPoint.Y, 0f);
+        RaycastHit groundHit;
+        if (TryRaycastGround(camera.ScreenPointToRay(screenPoint), out groundHit))
+        {
+            spawnPosition = groundHit.point;
+            return true;
+        }
+
+        Vector3 groundForward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up).normalized;
+        if (groundForward.sqrMagnitude < 0.001f)
+            groundForward = camera.transform.forward;
+
+        Vector3 fallbackOrigin = camera.transform.position + groundForward * 6f + Vector3.up * 10f;
+        if (TryRaycastGround(new Ray(fallbackOrigin, Vector3.down), out groundHit))
+        {
+            spawnPosition = groundHit.point;
+            return true;
+        }
+
+        return false;
+    }
+
+    private bool TryRaycastGround(Ray ray, out RaycastHit groundHit)
+    {
+        RaycastHit[] hits = Physics.RaycastAll(
+            ray,
+            plantRaycastDistance,
+            Physics.DefaultRaycastLayers,
+            QueryTriggerInteraction.Ignore);
+
+        Array.Sort(hits, (left, right) => left.distance.CompareTo(right.distance));
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.collider.CompareTag("Ground"))
+            {
+                groundHit = hit;
+                return true;
+            }
+        }
+
+        groundHit = new RaycastHit();
+        return false;
     }
 
     private IEnumerator PlayAndDestroy(GameObject plantObj, UnityEngine.Formats.Alembic.Importer.AlembicStreamPlayer player)
@@ -347,7 +465,10 @@ public class Demo : MonoBehaviour {
 
     void OnGUI()
     {
-        if (!gameManager.isDrawing)
+		// This is the original $P recognizer's gesture-authoring UI. It is useful
+		// when creating templates, but should not draw a framed debug area over
+		// the actual game canvas.
+		if (!gameManager.isDrawing || !showGestureDebugUI)
             return;
 
         GUI.Box(drawArea, "Draw Area");

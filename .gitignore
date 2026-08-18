@@ -58,4 +58,29 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 
-Assets/output.abc
+# Portfolio source-only update
+/ArtSource/
+/Artifacts/
+/Docs/
+/HoudiniSource/
+/Houdini_Export_Package/
+/Tools/
+/WebShowcase/
+/output/
+/Assets/OkamiWolf/
+/Assets/OkamiWolf.meta
+/Assets/Resources/FailedInk/
+/Assets/Resources/FailedInk.meta
+/Assets/ThirdParty/
+/Assets/ThirdParty.meta
+/Assets/Materials/OkamiGroundWatercolor.mat
+/Assets/Materials/OkamiGroundWatercolor.mat.meta
+/Assets/Scenes/NiloGrassCoreTest.unity
+/Assets/Scenes/NiloGrassCoreTest.unity.meta
+/Assets/Scenes/OkamiTrailPrototype.unity
+/Assets/Scenes/OkamiTrailPrototype.unity.meta
+/Assets/output.abc.meta
+/Packages/com.unity.formats.alembic/
+*.abc
+*.hip
+*.hipnc

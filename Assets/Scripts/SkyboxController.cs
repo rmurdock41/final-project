@@ -7,7 +7,6 @@ public class SkyboxController : MonoBehaviour
     public Light sunLight;
     public float transitionSpeed = 0.5f;
 
-    private bool isDay = true;
     private float blendValue = 1f;
     private float targetBlend = 1f;
     private float maxLightIntensity;
@@ -25,6 +24,13 @@ public class SkyboxController : MonoBehaviour
 
     void Start()
     {
+        if (daySkybox == null || nightSkybox == null || sunLight == null)
+        {
+            Debug.LogError("SkyboxController requires day/night materials and a sun light.", this);
+            enabled = false;
+            return;
+        }
+
         maxLightIntensity = sunLight.intensity;
 
 
@@ -45,6 +51,7 @@ public class SkyboxController : MonoBehaviour
         nightSkyBottom = nightSkyboxInstance.GetColor("_SkyGradientBottom");
 
         RenderSettings.skybox = runtimeSkybox;
+        ApplyBlend();
     }
 
     void Update()
@@ -58,8 +65,15 @@ public class SkyboxController : MonoBehaviour
             SetNight();
         }
 
-        blendValue = Mathf.Lerp(blendValue, targetBlend, Time.deltaTime * transitionSpeed);
+        if (Mathf.Approximately(blendValue, targetBlend))
+            return;
 
+        blendValue = Mathf.MoveTowards(blendValue, targetBlend, Time.deltaTime * transitionSpeed);
+        ApplyBlend();
+    }
+
+    private void ApplyBlend()
+    {
         Color currentSunDisc = Color.Lerp(nightSunDisc, daySunDisc, blendValue);
         Color currentSunHalo = Color.Lerp(nightSunHalo, daySunHalo, blendValue);
         Color currentHorizon = Color.Lerp(nightHorizon, dayHorizon, blendValue);
@@ -90,13 +104,11 @@ public class SkyboxController : MonoBehaviour
 
     public void SetDay()
     {
-        isDay = true;
         targetBlend = 1f;
     }
 
     public void SetNight()
     {
-        isDay = false;
         targetBlend = 0f;
     }
 }
