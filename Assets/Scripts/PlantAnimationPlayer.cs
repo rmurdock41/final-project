@@ -10,11 +10,15 @@ public class PlantAnimationPlayer : MonoBehaviour
     void Start()
     {
         alembicPlayer = GetComponent<AlembicStreamPlayer>();
-        if (alembicPlayer != null)
+        if (alembicPlayer == null)
         {
-            alembicPlayer.CurrentTime = 0f;
-            StartCoroutine(PlayAnimation());
+            Debug.LogError("PlantAnimationPlayer requires an AlembicStreamPlayer component.", this);
+            enabled = false;
+            return;
         }
+
+        alembicPlayer.CurrentTime = 0f;
+        StartCoroutine(PlayAnimation());
     }
 
     private IEnumerator PlayAnimation()
@@ -29,6 +33,8 @@ public class PlantAnimationPlayer : MonoBehaviour
             yield return null;
         }
 
+        alembicPlayer.CurrentTime = duration;
+
         yield return new WaitForSeconds(3f);
 
         yield return StartCoroutine(ShrinkAndDestroy());
@@ -36,6 +42,12 @@ public class PlantAnimationPlayer : MonoBehaviour
 
     private IEnumerator ShrinkAndDestroy()
     {
+        if (shrinkDuration <= 0f)
+        {
+            Destroy(gameObject);
+            yield break;
+        }
+
         Vector3 originalScale = transform.localScale;
         float elapsed = 0f;
 
