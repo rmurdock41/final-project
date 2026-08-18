@@ -1,5 +1,88 @@
 # Amaterasu's Brush: Interactive Nature Restoration
 
+**Unity · Technical Art · Houdini · Procedural Rendering**
+
+New Celestial Brush commands, Houdini-authored plant growth, a procedural vegetation trail, ink-style ground shadows, and failed-stroke feedback built in Unity.
+
+[View the full project page](https://r-murdock.com/amaterasus-brush)
+
+![Ink-wash mountains and a hillside filled with flowers](imgs/portfolio/ink-landscape-bloom-v2.png)
+
+## Project overview
+
+Amaterasu's Brush is a Unity technical-art project built around gesture-driven world effects. It begins with [Mix and Jam's Celestial Brush prototype](https://github.com/mixandjam/Okami-Celestial-Brush), which supplies the gesture recognizer, brush interface, bomb and tree interactions, and Toon Shader.
+
+This project adds sun, moon, and plant commands; day and night responses; Houdini plant growth; a replacement wolf character; a procedural grass-and-flower trail; ink-style ground shadows; and ordered failed-stroke feedback.
+
+![The white wolf running through the Unity forest with grass and flowers behind it](imgs/portfolio/case-hero-vegetation-v1.png)
+
+### Contributions at a glance
+
+- Recorded and integrated new sun, moon, and plant gesture templates
+- Connected gesture results to sky transitions, celestial effects, and plant growth
+- Built a Houdini growth animation and integrated its Alembic playback in Unity
+- Replaced and retuned the player character, collider, camera follow, and walk state
+- Adapted an indirect-instanced grass renderer into a path-driven vegetation trail
+- Added flower growth, retreating vegetation, and petal release along the trail
+- Developed a watercolor ground shader using the directional-light shadow map
+- Added ordered stroke dissolution and directionally drifting ink fragments for failed input
+
+## Project showcase
+
+### 01 · Brush commands
+
+New gesture templates were recorded for the sun, moon, and plant. Recognition results are routed to the corresponding visual effects, day/night transitions, and plant-growth trigger while retaining the original recognizer as the input framework.
+
+| Sun command | Moon command |
+| --- | --- |
+| ![Drawing the sun command and changing the scene to daytime](imgs/portfolio/case-sun-command-v4.jpg) | ![Drawing the moon command and changing the scene to nighttime](imgs/portfolio/case-moon-command-v4.jpg) |
+
+### 02 · Houdini plant growth
+
+The plant mesh and its curl-to-unfold growth animation were built in Houdini, exported as Alembic, and connected to the plant command for playback in Unity.
+
+| Houdini growth animation | Unity gameplay integration |
+| --- | --- |
+| ![Houdini plant growing from a curled shoot](imgs/portfolio/houdini-plant-growth-v1.webp) | ![Plant command triggering growth inside Unity](imgs/portfolio/case-plant-growth-unity-v1.jpg) |
+
+### 03 · Character integration
+
+A rigged quadruped asset was connected to the player controller and walk state. Scale, ground offset, collider bounds, and camera follow were corrected in Unity, then the supplied Toon Shader and outline were configured to match the scene.
+
+| Rigged character | Walk integration |
+| --- | --- |
+| ![Render of the rigged white wolf character](imgs/portfolio/wolf-character-front-v1.png) | ![Walk animation of the white wolf](imgs/okami_walk.gif) |
+
+### 04 · Procedural vegetation trail
+
+The trail adapts NiloCat's indirect grass-rendering example and Quaternius's CC0 flower mesh. A custom emitter samples the wolf's path, controls grass and flower density, grows instances from below the terrain, returns them into the ground, and releases petals as the trail clears.
+
+![Grass and flowers growing behind the wolf](imgs/portfolio/case-vegetation-trail-v2.jpg)
+
+### 05 · Ink-style ground shadows
+
+The ground shader samples the directional-light shadow map and reshapes it with a softer boundary, paper breakup, and controlled dry-brush gaps. Cascade blending was corrected so the shadow remains continuous as the camera moves.
+
+![Ink-style ground shadows in the Unity scene](imgs/portfolio/case-ink-shadow-v1.png)
+
+### 06 · Failed-stroke feedback
+
+When recognition fails, the drawn stroke remains visible and dissolves in drawing order. A separate particle layer follows the same direction and drifts away with independent timing.
+
+![A failed brush stroke dissolving into drifting ink particles](imgs/portfolio/case-failed-stroke-v1.jpg)
+
+## Technical stack
+
+- Unity 2019.4 and C# gameplay/editor scripting
+- Universal Render Pipeline, ShaderLab, and HLSL
+- Houdini procedural modeling and Alembic animation exchange
+- GPU indirect instancing for trail vegetation
+- Custom gesture templates, coroutine-driven sequencing, and particle systems
+
+The sections below preserve the original CIS 566 design document and its detailed implementation notes.
+
+---
+
 ## CIS 566 Final Project Design Document
 
 Muqiao Lei
