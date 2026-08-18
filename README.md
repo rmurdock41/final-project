@@ -35,7 +35,7 @@ New gesture templates were recorded for the sun, moon, and plant. Recognition re
 
 | Sun command | Moon command |
 | --- | --- |
-| ![Drawing the sun command and changing the scene to daytime](imgs/portfolio/case-sun-command-v4.jpg) | ![Drawing the moon command and changing the scene to nighttime](imgs/portfolio/case-moon-command-v4.jpg) |
+| ![Drawing the sun command and changing the scene to daytime](imgs/portfolio/case-sun-command-v4.gif) | ![Drawing the moon command and changing the scene to nighttime](imgs/portfolio/case-moon-command-v4.gif) |
 
 ### 02 · Houdini plant growth
 
@@ -43,7 +43,7 @@ The plant mesh and its curl-to-unfold growth animation were built in Houdini, ex
 
 | Houdini growth animation | Unity gameplay integration |
 | --- | --- |
-| ![Houdini plant growing from a curled shoot](imgs/portfolio/houdini-plant-growth-v1.webp) | ![Plant command triggering growth inside Unity](imgs/portfolio/case-plant-growth-unity-v1.jpg) |
+| ![Houdini plant growing from a curled shoot](imgs/portfolio/houdini-plant-growth-v1.webp) | ![Plant command triggering growth inside Unity](imgs/portfolio/case-plant-growth-unity-v1.gif) |
 
 ### 03 · Character integration
 
@@ -57,19 +57,19 @@ A rigged quadruped asset was connected to the player controller and walk state. 
 
 The trail adapts NiloCat's indirect grass-rendering example and Quaternius's CC0 flower mesh. A custom emitter samples the wolf's path, controls grass and flower density, grows instances from below the terrain, returns them into the ground, and releases petals as the trail clears.
 
-![Grass and flowers growing behind the wolf](imgs/portfolio/case-vegetation-trail-v2.jpg)
+![Grass and flowers growing behind the wolf](imgs/portfolio/case-vegetation-trail-v2.gif)
 
 ### 05 · Ink-style ground shadows
 
 The ground shader samples the directional-light shadow map and reshapes it with a softer boundary, paper breakup, and controlled dry-brush gaps. Cascade blending was corrected so the shadow remains continuous as the camera moves.
 
-![Ink-style ground shadows in the Unity scene](imgs/portfolio/case-ink-shadow-v1.png)
+![Ink-style ground shadows in the Unity scene](imgs/portfolio/case-ink-shadow-gameplay-v1.gif)
 
 ### 06 · Failed-stroke feedback
 
 When recognition fails, the drawn stroke remains visible and dissolves in drawing order. A separate particle layer follows the same direction and drifts away with independent timing.
 
-![A failed brush stroke dissolving into drifting ink particles](imgs/portfolio/case-failed-stroke-v1.jpg)
+![A failed brush stroke dissolving into drifting ink particles](imgs/portfolio/case-failed-stroke-v1.gif)
 
 ## Technical stack
 
